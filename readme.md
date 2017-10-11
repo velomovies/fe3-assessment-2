@@ -1,7 +1,7 @@
 # Speaking a language?
 
-This chart is based [`bl.ock`](https://bl.ocks.org/mbostock/4063269) by
-[**@mbostock**](https://github.com/mbostock) (GPL-3.0).
+This chart is based [`bl.ock`](https://bl.ocks.org/alandunning/4c36eb1abdb248de34c64f5672afd857) by
+[**@alandunning**](https://github.com/alandunning) (GPL-3.0).
 
 ![Preview image](preview.png)
 > My work
@@ -29,4 +29,4 @@ d3 is using a tsv (tab-separated value) file to make a visualization.
 
 ## License
 
-GPL-3.0 © Victor Zumpolle
+MIT © Victor Zumpolle
