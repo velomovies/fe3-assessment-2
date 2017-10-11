@@ -1,37 +1,32 @@
-# ![Assessment 2][banner]
+# Speaking a language?
 
-This repository can be forked for [**assessment 2**][a2] of [frontend 3][fe3]
-at [**@CMDA**][cmda].
+This chart is based [`bl.ock`](https://bl.ocks.org/mbostock/4063269) by
+[**@mbostock**](https://github.com/mbostock) (GPL-3.0).
 
-## TODO
+![Preview image](preview.png)
+> My work
+> [**Velomovies**](https://velomovies.github.io/fe3-assessment-1/).
 
-*   [ ] [GitHub Pages](#github-pages)
-*   [ ] [Metadata](#metadata)
-*   [ ] [Issues](#issues)
-*   [ ] Replace this document in your fork with your own readme!
+## Background
 
-## GitHub Pages
+This is an assessment.
 
-Set up [GitHub Pages][pages] for this fork through the **Settings** pane.  Use
-the **Master branch** as its source.  Do not choose a Jekyll template.
+## Data
 
-## Metadata
+d3 is using a tsv (tab-separated value) file to make a visualization. 
+* `Something` — Description
+* `Something` — Description
 
-Edit the **description** and **url** of your repository.  Click on edit above
-the green Clone or download button and fill in a correct description and use the
-`github.io` URL you just set up.
+## Features
+*   [`d3-format`](https://github.com/d3/d3-format#api-reference)
+    — `d3.format([number])`
+*   [`d3-hierarchy`](https://github.com/d3/d3-hierarchy#api-reference)
+    — `d3.hierarchy(data[, children])`
+    — `d3.pack`
+*   [`d3-request`](https://github.com/d3/d3-request#api-reference)
+    — `d3.tsv`
+    — Loading files
 
-## Issues
+## License
 
-Enable issues so we can give feedback by going to the settings tab of your fork
-and checking the box next to `issues`.
-
-[banner]: https://cdn.rawgit.com/cmda-fe3/logo/a4b0614/banner-assessment-2.svg
-
-[a2]: https://github.com/cmda-fe3/course-17-18/tree/master/assessment-2#description
-
-[fe3]: https://github.com/cmda-fe3
-
-[cmda]: https://github.com/cmda
-
-[pages]: https://pages.github.com
+GPL-3.0 © Victor Zumpolle
