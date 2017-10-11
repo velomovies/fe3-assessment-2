@@ -29,4 +29,4 @@ d3 is using a tsv (tab-separated value) file to make a visualization.
 
 ## License
 
-MIT © Victor Zumpolle
+GPL-3.0 © Victor Zumpolle
