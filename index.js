@@ -1,7 +1,10 @@
+//This code is based on https://bl.ocks.org/alandunning/4c36eb1abdb248de34c64f5672afd857 by Alan Dunning. I created my own version of it and added some code.
+
+//Set a width and height for the whole graph. This is later used to caclulate exact attributes
 var width = 600,
   height = 600
 
-// Config for the Radar chart
+// Configuration for the Radar chart
 var config = {
   w: width,
   h: height,
@@ -52,12 +55,14 @@ var countryNames = {
   E_IACCPC_ENT10_C10_18UK: "United Kingdom",
 }
 
+//Load in the indext.tsv as a text file so it can be used to clean the data. It starts with a really dirty dataset.
 d3.text("index.tsv")
   .get(onload)
 
 function onload(err, doc) {
   if (err) throw err
 
+//Start the clean up. This is based on the code from the cleaning example.
   var header = doc.indexOf("indic_is,unit,sizen_r2,")
   doc = doc.slice(header)
   end = doc.indexOf("\n", doc)
@@ -68,6 +73,7 @@ function onload(err, doc) {
   doc = doc.substring(start, end).trim()
   data = d3.csvParseRows(doc, map)
 
+//After you parse the rows it checks if it has data. When there is no data it will not show anything. Next to that it gives all the data a usefull name.
   function map(d, i) {
     if (d[1] == "" || d[2] == "" || d[3] == "" || d[4] == "" || d[5] == "" || d[6] == "" || d[7] == "" || d[8] == "") {
       return
@@ -84,19 +90,24 @@ function onload(err, doc) {
       y2009: Number(d[8])
     }
   }
+
+//When the data is cleaned I push it to a array so it can be used as raw data in the chart.
+//Next to that it will draw the Radar-chart with the dataset and configuration done earlier.
   dataset.push(data)
   RadarChart.draw("#chart", dataset, config)
-  console.log(data)
 }
 
+//Variable that is used for the cleaned data.
 var dataset = []
 
+//SVG is used to append a svg on. This is the base of the chart and will be used in later stages to append more things
 var svg = d3.select("body")
   .selectAll("svg")
   .append("svg")
   .attr("width", width)
   .attr("height", height)
 
+//This is a object that holds all information about the chart itself. It sets all kind of factors. It is easy to make a small change to the size for example.
 var RadarChart = {
   draw: function(id, d, options) {
     var cfg = {
@@ -117,6 +128,7 @@ var RadarChart = {
       color: d3.scaleOrdinal().range(["#6F257F", "#CA0D59"])
     }
 
+//This cleans more code. It sets the % in the chart to a rounded number
     if ("undefined" !== typeof options) {
       for (var i in options) {
         if ("undefined" !== typeof options[i]) {
@@ -125,16 +137,21 @@ var RadarChart = {
       }
     }
 
+//cfg is the configuration of the chart and here you set an maxValue. When you make this bigger it will make the scale of the chart bigger
     cfg.maxValue = 100
 
+//In this block you append the name of the country to the axis around the circle.
     var allAxis = (d[0].map(function(i, j) {
       return i.country
     }))
+//Here are some calculations to show the circle in good order. Like making setting a radius and the total amount of axis it had to use. (Based on the amount of countries in this case)
     var total = allAxis.length
     var radius = cfg.factor * Math.min(cfg.w / 2, cfg.h / 2)
     var Format = d3.format("%")
+//This will delete any svg's that are already in the document and are not in use
     d3.select(id).select("svg").remove()
 
+//Here you append a svg to the document (A div with id #chart) and get some attribues that will later be used in calculations. And to set up the basic dimmensions of the chart.
     var g = d3.select(id)
       .append("svg")
       .attr("width", cfg.w + cfg.ExtraWidthX)
@@ -142,23 +159,29 @@ var RadarChart = {
       .append("g")
       .attr("transform", "translate(" + cfg.TranslateX + "," + cfg.TranslateY + ")")
 
+//Select the selection box in the HTML and check if there is an update. This is used to see if there is a update to the selection. If there is it will update the chart so it shows the new information.
       var sel = document.getElementById("yearSelect");
       var dropSelect = d3.select("select")
       dropSelect.on("click", selectUpdate)
 
-
-
+//This function updates the chart. It will be activated when there is a click on the selection tool.
       function selectUpdate(){
-        d.forEach(dataPolygon)
-        d.forEach(dataTooltip)
 
+// It starts two forEach loops to update the chart.
+        d.forEach(dataPolygonUpdate)
+        d.forEach(dataTooltipUpdate)
 
-        function dataPolygon(y, x, d) {
+//The first function that starts will change the polygon that is used to show the data. It is stored in an array: dataValues.
+        function dataPolygonUpdate(y, x, d) {
           dataValues = []
+
+//Here is a check what the actual selected value of the selected item.
           var year = function(k) {
             for(var i in k) { if(sel.value == i) {
               return k[i]}}
           };
+
+//The data of the select is used here for a complicated calculation to set a path for the polygon. It is pushed in an array and used to set the actual path
           g.selectAll(".nodes")
             .data(y, function(j, i) {
               dataValues.push([
@@ -167,13 +190,14 @@ var RadarChart = {
               ])
             })
 
+//The data calculated above is used. The actual polygon will be updated and with a little transition it gives life to the chart.
           g.selectAll(".area")
             .data([dataValues])
             .enter()
             .select("polygon")
-            .attr("class", "radar-chart-serie" + series).transition().duration(2000).ease(d3.easeElastic)
+            .attr("class", "radar-chart-serie" + 0).transition().duration(2000).ease(d3.easeElastic)
             .style("stroke-width", "2px")
-            .style("stroke", cfg.color(series))
+            .style("stroke", cfg.color(1))
             .attr("points", function(d) {
               var str = ""
               for (var pti = 0; pti < d.length; pti++) {
@@ -181,25 +205,28 @@ var RadarChart = {
               }
               return str
             })
-          series++
         }
 
-        function dataTooltip(y, x) {
+//Here it will update all tooptips for all points in the chart.
+        function dataTooltipUpdate(y, x) {
+
+//Here it checks again what the actual selected value of the selected item. This time two different functions because the data that is put true is different.
           var year = function(k) {
             for(var i in k) { if(sel.value == i) {
               return k[i]}}
           };
           var yeard = function(d) {
             for(var i in d) { if(sel.value == i) {
-              console.log(i)
               return d[i]}}
           };
 
+//It updates the data and the circle will get a few attributes (same as above) to calculate the exact position. It also gives a styling to the circles.
           var circles = g.selectAll(".nodes")
             .data(y).enter()
             .selectAll("circle")
 
-            circles.transition().duration(2000).ease(d3.easeElastic).attr("class", "radar-chart-serie" + series)
+//I give a little transition to the circle and set attributes. The attributes are calculated with a difficult calculation to set the position.
+            circles.transition().duration(2000).ease(d3.easeElastic).attr("class", "radar-chart-serie" + 0)
             .attr("r", cfg.radius)
             .attr("alt", function(j) {
               return Math.max(year(j), 0)
@@ -217,30 +244,31 @@ var RadarChart = {
             .attr("data-id", function(j) {
               return j.country
             })
+
+//Next to the position you set a style for the different circles
             .style("fill", "#fff")
             .style("stroke-width", "2px")
-            .style("stroke", cfg.color(series)).style("fill-opacity", .9)
+            .style("stroke", cfg.color(0)).style("fill-opacity", .9)
 
-
+//The on event checks if the circle is clicked. It shows a tooltip with exact information of that point. With mouseout it removes the tooltip again.
             circles.on("click", function(d) {
               tooltip
                 .style("left", d3.event.pageX - 40 + "px")
                 .style("top", d3.event.pageY - 80 + "px")
                 .style("display", "inline-block")
-                .html((d.country) + "<br><span>" + (yeard(d)) + "</span>")
+                .html((d.country) + "<br><span>" + (yeard(d)) + "%</span>")
             })
             .on("mouseout", function(d) {
               tooltip.style("display", "none")
             })
-
-          series++
         }
       }
+//End of the update of the chart. Below is the setup of the chart that will be used when it is loaded in in the first place.
 
-      var tooltip
-
-    //Circular segments
+//Circular segments are calculated and put in the chart. This is the whole circle of the chart and the circles inside of it. Next to setting the circle it gives a style to the elements.
     for (var j = 0; j < cfg.levels; j++) {
+
+//The data from cfg is used to calculate the location and amount of circles
       var levelFactor = cfg.factor * radius * ((j + 1) / cfg.levels)
       g.selectAll(".levels")
         .data(allAxis)
@@ -258,6 +286,8 @@ var RadarChart = {
         .attr("y2", function(d, i) {
           return levelFactor * (1 - cfg.factor * Math.cos((i + 1) * cfg.radians / total))
         })
+
+//When the circles are set they get a style to them
         .attr("class", "line")
         .style("stroke", "grey")
         .style("stroke-opacity", "0.75")
@@ -265,7 +295,7 @@ var RadarChart = {
         .attr("transform", "translate(" + (cfg.w / 2 - levelFactor) + ", " + (cfg.h / 2 - levelFactor) + ")")
     }
 
-    //Text indicating at what % each level is
+    //Text indicating at what % each level is. Again calculated with information out the cfg object.
     for (var j = 0; j < cfg.levels; j++) {
       var levelFactor = cfg.factor * radius * ((j + 1) / cfg.levels)
       g.selectAll(".levels")
@@ -278,6 +308,8 @@ var RadarChart = {
         .attr("y", function(d) {
           return levelFactor * (1 - cfg.factor * Math.cos(0))
         })
+
+//After the location is calculated the style is used to show the amount of "%" in the circle
         .attr("class", "legend")
         .style("font-family", "Questrial, sans-serif")
         .style("font-size", "12px")
@@ -286,14 +318,14 @@ var RadarChart = {
         .text((j + 1) * 100 / cfg.levels)
     }
 
-    series = 0
-
+//This is the code to set up the axis with information. First it will use the data of allAxis (data with the names of the countries). It creates a "g" and gives it attributes
     var axis = g.selectAll(".axis")
       .data(allAxis)
       .enter()
       .append("g")
       .attr("class", "axis")
 
+//It makes the different segments in the circle. This is already calculated but know you append all information to a line elemnt.
     axis.append("line")
       .attr("x1", cfg.w / 2)
       .attr("y1", cfg.h / 2)
@@ -302,11 +334,14 @@ var RadarChart = {
       })
       .attr("y2", function(d, i) {
         return cfg.h / 2 * (1 - cfg.factor * Math.cos(i * cfg.radians / total))
-      })
+      }).transition()
+
+//The style of the element is set here. It is easy to change from here.
       .attr("class", "line")
       .style("stroke", "grey")
       .style("stroke-width", "1px")
 
+//After the chart (without data) is shown it sets the text of the different countries in the HTML. The text is the name of country.
     axis.append("text")
       .attr("class", "legend")
       .text(function(d) {
@@ -319,6 +354,8 @@ var RadarChart = {
       .attr("transform", function(d, i) {
         return "translate(0, -10)"
       })
+
+//With a complicated calculation is calculated where the text element has to go in the chart
       .attr("x", function(d, i) {
         return cfg.w / 2 * (1 - cfg.factorLegend * Math.sin(i * cfg.radians / total)) - 60 * Math.sin(i * cfg.radians / total)
       })
@@ -326,12 +363,15 @@ var RadarChart = {
         return cfg.h / 2 * (1 - Math.cos(i * cfg.radians / total)) - 20 * Math.cos(i * cfg.radians / total)
       })
 
-
+//Same as the update function but know it will be used to initially set the whole chart
     d.forEach(dataPolygon)
 
+//The first function that starts will set the polygon that is used to show the data. It is stored in an array: dataValues.
     function dataPolygon(y, x, d) {
       dataValues = []
       g.selectAll(".nodes")
+
+//The data used is set as hard code. Because the first data you will see is 2009 it only used that part of the data.
         .data(y, function(j, i) {
           dataValues.push([
             cfg.w / 2 * (1 - (parseFloat(Math.max(j.y2009, 0)) / cfg.maxValue) * cfg.factor * Math.sin(i * cfg.radians / total)),
@@ -339,13 +379,14 @@ var RadarChart = {
           ])
         })
 
+//When the calculations are done the data from the "dataValues" array is used to set an polygon. The difference between the update and this is that you append a polygon to the svg instead of selecting and updating an existing polygon.
       g.selectAll(".area")
         .data([dataValues])
         .enter()
         .append("polygon")
-        .attr("class", "radar-chart-serie" + series)
+        .attr("class", "radar-chart-serie" + 0)
         .style("stroke-width", "2px")
-        .style("stroke", cfg.color(series))
+        .style("stroke", cfg.color(0))
         .attr("points", function(d) {
           var str = ""
           for (var pti = 0; pti < d.length; pti++) {
@@ -354,9 +395,11 @@ var RadarChart = {
           return str
         })
         .style("fill", function(j, i) {
-          return cfg.color(series)
+          return cfg.color(0)
         })
         .style("fill-opacity", cfg.opacityArea)
+
+//When you hover over the whole polygon it sets a little transition with an change of opacity so it changes color. This gives a bit of a dynamic feeling.
         .on("mouseover", function(d) {
           z = "polygon." + d3.select(this).attr("class")
           g.selectAll("polygon")
@@ -371,21 +414,23 @@ var RadarChart = {
             .transition(200)
             .style("fill-opacity", cfg.opacityArea)
         })
-      series++
     }
-    series = 0
 
-
+//Here is the tooltip created. From this moment you can use the "tooltip" variable to append, select and set attributes to them.
     var tooltip = d3.select("body").append("div").attr("class", "toolTip")
 
+//As for the update it will run an forEach loop through all data to set information
     d.forEach(dataTooltip)
 
+//It appends circles and sets the data. The circle will get a few attributes (same as above) to calculate the exact position. It also gives a styling to the circles.
     function dataTooltip(y, x) {
       g.selectAll(".nodes")
         .data(y).enter()
         .append("svg:circle")
-        .attr("class", "radar-chart-serie" + series)
+        .attr("class", "radar-chart-serie" + 0)
         .attr("r", cfg.radius)
+
+//Same as the "dataPolygon" function. Because you see at first instance the data from 2009 it uses only that data first.
         .attr("alt", function(j) {
           return Math.max(j.y2009, 0)
         })
@@ -402,21 +447,23 @@ var RadarChart = {
         .attr("data-id", function(j) {
           return j.country
         })
+
+//After the position the style is defined.
         .style("fill", "#fff")
         .style("stroke-width", "2px")
-        .style("stroke", cfg.color(series)).style("fill-opacity", .9)
+        .style("stroke", cfg.color(0)).style("fill-opacity", .9)
+
+//This on event is the same as the update. It shows the tooltip and exact information when clicked on an circle. It will remove itself when you mouseout
         .on("click", function(d) {
           tooltip
             .style("left", d3.event.pageX - 40 + "px")
             .style("top", d3.event.pageY - 80 + "px")
             .style("display", "inline-block")
-            .html((d.country) + "<br><span>" + (d.y2009) + "</span>")
+            .html((d.country) + "<br><span>" + (d.y2009) + "%</span>")
         })
         .on("mouseout", function(d) {
           tooltip.style("display", "none")
         })
-
-      series++
     }
   }
 }

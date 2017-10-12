@@ -1,10 +1,12 @@
+/* CSS based on based on https://bl.ocks.org/alandunning/4c36eb1abdb248de34c64f5672afd857 by Alan Dunning. I created my own version of it and added some code */
+
 body {
   background-color: #F1F3F3;
   font-family: 'Questrial', sans-serif;
 }
 
 h1 {
-  padding-left: 230px;
+  padding-left: 370px;
 }
 
 select {
@@ -32,6 +34,9 @@ select {
 	left: 100px;
 }
 
+circle {
+  cursor: pointer;
+}
   .toolTip {
   pointer-events: none;
 	position: absolute;
@@ -63,8 +68,4 @@ select {
 .toolTip span {
 	font-weight: 500;
   color: #081F2C;
-}
-
-.radar-chart-serie1 {
-  display: none !important;
 }
