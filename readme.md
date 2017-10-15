@@ -15,7 +15,7 @@ The most difficult part was to show the data that is selected in the select. I g
 ```javascript
   var sel = document.getElementById("yearSelect");
       var dropSelect = d3.select("select")
-      dropSelect.on("click", selectUpdate)
+      dropSelect.on("change", selectUpdate)
 
       function selectUpdate(){
         ...
