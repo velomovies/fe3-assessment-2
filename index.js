@@ -162,7 +162,7 @@ var RadarChart = {
 //Select the selection box in the HTML and check if there is an update. This is used to see if there is a update to the selection. If there is it will update the chart so it shows the new information.
       var sel = document.getElementById("yearSelect");
       var dropSelect = d3.select("select")
-      dropSelect.on("click", selectUpdate)
+      dropSelect.on("change", selectUpdate)
 
 //This function updates the chart. It will be activated when there is a click on the selection tool.
       function selectUpdate(){
